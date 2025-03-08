@@ -24,7 +24,7 @@ def parse_args():
     parser.add_argument(
         "--output-dir", "-od",
         type=str,
-        default="/output/",
+        default="output/",
         help="output directory for json formatted resutls"
     )
     

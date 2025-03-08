@@ -6,6 +6,7 @@ def detect(df: DataFrame) -> DataFrame:
 
     logs = df.filter(
         F.col("eventName").isin(suspicious_events) &
-        (F.col("requestParameters.attributeName") == "restore") 
+        (F.col("requestParameters.attributeName") == "restore") #&
+                # (F.size(F.col("requestParameters.valuesToAdd")) > 0)
     )    
     return logs
