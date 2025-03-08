@@ -47,3 +47,28 @@ pip install -r requirements.txt
 python tests/validate_pyspark.py
 ```
 
+
+# CLI
+example:
+```
+python cli.py
+```
+abstraction:
+```
+❯ python cli.py -h
+usage: cli.py [-h] [--input INPUT] [--output-format {stdout,json}] [--output-dir OUTPUT_DIR] [--detections-dir DETECTIONS_DIR]
+
+PySpark CloudTrail detections
+
+options:
+  -h, --help            show this help message and exit
+  --input INPUT, -i INPUT
+                        path to directoyrsupports partisioned data sets and nested dirs (default: input_logs/logs_part2/)
+  --output-format {stdout,json}, -of {stdout,json}
+                        output format for the results'stdout' prints to console, 'json' writes to files (default: stdout)
+  --output-dir OUTPUT_DIR, -od OUTPUT_DIR
+                        output directory for json formatted resutls (default: /output/)
+  --detections-dir DETECTIONS_DIR, -dd DETECTIONS_DIR
+                        directory of the detections data exfiltration should be named: 'data_exfil_*.py' (default: detections)
+```
+

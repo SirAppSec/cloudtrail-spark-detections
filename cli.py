@@ -8,12 +8,8 @@ from pyspark.sql import functions as F
 from pyspark.sql.utils import AnalysisException
 
 from schema_validation.cloudtrail import cloudtrail_schema, CloudTrailValidation
+from parser import parse_args
 
-
-log_directory = "input_logs/logs_part2/"
-output_format = "stdout"
-output_folder = "/output/"
-input = log_directory
 
 def load_and_preprocess(spark, input_path):
     return spark.read.schema(cloudtrail_schema) \
@@ -21,6 +17,16 @@ def load_and_preprocess(spark, input_path):
         .select(F.explode("Records").alias("record")) \
         .select("record.*")
 def main():
+    #load args
+    args = parse_args()
+
+    log_directory = args.input
+    output_format = args.output_format
+    output_folder = args.output_dir
+    detections_dir = args.detections_dir
+    input = log_directory
+
+    #start spark Session
     spark = SparkSession.builder \
         .appName("CloudTrail Analysis") \
         .config("spark.sql.adaptive.enabled", "true") \
@@ -33,7 +39,7 @@ def main():
         
         # Dynamically load all detection modules
         detection_modules = []
-        detection_dir = Path("detections")
+        detection_dir = Path(detections_dir)
         for file in detection_dir.glob("data_exfil_*.py"):
             module_name = file.stem
             try:
