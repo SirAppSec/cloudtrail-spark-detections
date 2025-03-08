@@ -37,8 +37,6 @@ def main():
         .config("spark.sql.adaptive.enabled", "true") \
         .getOrCreate()
 
-    detection_module = importlib.import_module(f"detections.data_exfil_0")
-    
     # load df
     print(input+'/test.json')
     raw_df = spark.read.json(input+'/test.json')
@@ -51,8 +49,6 @@ def main():
     # print("Sample Data:")
     # df.select("eventName", "eventSource", "sourceIPAddress").show(5, truncate=False)
     try:
-        # run detection function
-        results = detection_module.detect(df)
         
         # output handling
         if output_format == "stdout":
@@ -63,8 +59,39 @@ def main():
         print(f"COLUMN ERROR: {str(e)}")
         print("Available columns:", df.columns)
         raise
+        # Dynamically load all detection modules
+        detection_modules = []
+        detection_dir = Path("detections")
+        for file in detection_dir.glob("data_exfil_*.py"):
+            module_name = file.stem
+            try:
+                module = importlib.import_module(f"detections.{module_name}")
+                detection_modules.append((module_name, module))
+            except Exception as e:
+                print(f"Failed to load {module_name}: {str(e)}")
+                continue
+
+        if not detection_modules:
+            raise ValueError("No valid detection modules found in detections/ folder")
+
+        # Process each detection
+        for module_name, module in detection_modules:
+            print(f"\nRunning detection: {module_name}")
+            try:
+                results = module.detect(df)
+                if output_format == "stdout":
+                    print(f"Results for {module_name}:")
+                    results.show(truncate=False)
+                else:
+                    print(f"Saved results for {module_name} to {output_path}")
+            except AnalysisException as e:
+                print(f"Column error in {module_name}: {str(e)}")
+                print("Available columns:", df.columns)
+            except Exception as e:
+                print(f"Error in {module_name}: {str(e)}")
+
     except Exception as e:
-        print(f"Error processing detection: {str(e)}")
+        print(f"Fatal error: {str(e)}")
     finally:
         spark.stop()
 if __name__ == "__main__":
