@@ -26,7 +26,12 @@ source ~/.zshrc
 ```
 install pyspark 
 ```
-pip install pyspark
+pip install pyspark # Optimally use in venv
 ```
 ## quick start project
-
+initialize virtual env:
+```
+# pip install virtualenv # if missing
+python3 -m venv venv
+source venv/bin/activate
+```
